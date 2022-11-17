@@ -10,7 +10,13 @@
       <PackageTags>adb;android;android-debug-bridge</PackageTags>
       <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
       <Version>1.1.0</Version>
+      <PackageReleaseNotes></PackageReleaseNotes>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>
