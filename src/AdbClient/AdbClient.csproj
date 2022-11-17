@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+      <PackageId>patagona.$(AssemblyName)</PackageId>
+      <Authors>patagona</Authors>
+      <Description>A .NET Client for the Android Debug Bridge (ADB)</Description>
+      <PackageProjectUrl>https://github.com/patagonaa/AdbClient.NET</PackageProjectUrl>
+      <PackageTags>adb;android;android-debug-bridge</PackageTags>
+      <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
+      <Version>1.0.0</Version>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+</Project>
