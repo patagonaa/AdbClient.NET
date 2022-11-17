@@ -56,34 +56,78 @@ namespace AdbClient
             using var client = await GetConnectedClient(cancellationToken);
             await ExecuteAdbCommand(client, $"host:transport:{serial}");
             await ExecuteAdbCommand(client, $"shell,v2,raw:{GetShellCommand(command, parms)}");
-            if (stdin != null)
-                throw new NotImplementedException();
+
             var stream = client.GetStream();
 
-            while (true)
+            var stdInCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task? stdInTask = null;
+            if (stdin != null)
+                stdInTask = Task.Run(() => SendStdIn(stdin, stream, stdInCancellation.Token));
+            int? returnCode = null;
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var (type, message) = await GetMessage(stream);
-
-                switch (type)
+                while (returnCode == null)
                 {
-                    case 1:
-                        if (stdout != null)
-                            await stdout.WriteAsync(message);
-                        break;
-                    case 2:
-                        if (stderr != null)
-                            await stderr.WriteAsync(message);
-                        break;
-                    case 3:
-                        return message[0];
-                    default:
-                        throw new Exception($"Invalid Shell Command {type}");
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var (type, message) = await GetMessage(stream);
+
+                    switch (type)
+                    {
+                        case ShellProtocolType.kIdStdout:
+                            if (stdout != null)
+                                await stdout.WriteAsync(message);
+                            break;
+                        case ShellProtocolType.kIdStderr:
+                            if (stderr != null)
+                                await stderr.WriteAsync(message);
+                            break;
+                        case ShellProtocolType.kIdExit:
+                            returnCode = message[0];
+                            break;
+                        default:
+                            throw new Exception($"Invalid Shell Command {type}");
+                    }
                 }
             }
+            finally
+            {
+                stdInCancellation.Cancel();
+            }
+            if (stdInTask != null)
+                await stdInTask;
 
-            static async Task<(byte Type, byte[] Content)> GetMessage(Stream stream)
+            return returnCode.Value;
+
+            static async Task SendStdIn(Stream stdin, Stream stream, CancellationToken cancellationToken)
+            {
+                try
+                {
+                    var headerLen = 5;
+                    var bufferLen = 1024; // may be anything
+                    var buffer = new byte[headerLen + bufferLen].AsMemory();
+
+                    int readLen;
+                    while ((readLen = await stdin.ReadAsync(buffer[headerLen..], cancellationToken)) != 0)
+                    {
+                        buffer.Span[0] = (byte)ShellProtocolType.kIdStdin;
+                        var lengthBytes = BitConverter.GetBytes(readLen);
+                        if (!BitConverter.IsLittleEndian)
+                        {
+
+                            Array.Reverse(lengthBytes);
+                        }
+                        lengthBytes.CopyTo(buffer[1..]);
+                        await stream.WriteAsync(buffer[..(headerLen + readLen)], cancellationToken);
+                    }
+
+                    await stream.WriteAsync(new byte[] { (byte)ShellProtocolType.kIdCloseStdin, 0, 0, 0, 0 });
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
+            static async Task<(ShellProtocolType Type, byte[] Content)> GetMessage(Stream stream)
             {
                 var header = new byte[5];
                 await stream.ReadExact(header.AsMemory());
@@ -94,8 +138,19 @@ namespace AdbClient
                 var bodyLength = BitConverter.ToUInt32(header, 1);
                 var body = new byte[bodyLength];
                 await stream.ReadExact(body.AsMemory());
-                return (header[0], body);
+                return ((ShellProtocolType)header[0], body);
             }
+        }
+
+        private enum ShellProtocolType : byte
+        {
+            kIdStdin = 0,
+            kIdStdout = 1,
+            kIdStderr = 2,
+            kIdExit = 3,
+            kIdCloseStdin = 4,
+            kIdWindowSizeChange = 5,
+            kIdInvalid = 255,
         }
 
         private string GetShellCommand(string command, IEnumerable<string> parms)
