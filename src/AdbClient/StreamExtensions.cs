@@ -7,7 +7,7 @@ namespace AdbClient
 {
     internal static class StreamExtensions
     {
-        internal static async Task ReadExact(this Stream stream, Memory<byte> memory, CancellationToken cancellationToken = default)
+        internal static async Task ReadExact(this Stream stream, Memory<byte> memory, CancellationToken cancellationToken)
         {
             for (int i = 0; i < memory.Length;)
             {
@@ -15,7 +15,7 @@ namespace AdbClient
             }
         }
 
-        internal static async Task<uint> ReadUInt32(this Stream stream, CancellationToken cancellationToken = default)
+        internal static async Task<uint> ReadUInt32(this Stream stream, CancellationToken cancellationToken)
         {
             var buffer = new byte[4];
             await stream.ReadExact(buffer.AsMemory(), cancellationToken);
