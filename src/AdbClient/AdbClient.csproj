@@ -9,14 +9,18 @@
       <PackageProjectUrl>https://github.com/patagonaa/AdbClient.NET</PackageProjectUrl>
       <PackageTags>adb;android;android-debug-bridge</PackageTags>
       <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
-      <Version>1.1.0</Version>
-      <PackageReleaseNotes></PackageReleaseNotes>
+      <Version>2.0.0</Version>
+      <PackageReleaseNotes>
+          - fix!: use uint for stat element size
+          - fix: more consistent usage of cancellation token
+          - feat: add `host:track-devices support`
+      </PackageReleaseNotes>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
       <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

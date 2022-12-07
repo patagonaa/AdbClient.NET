@@ -10,6 +10,7 @@ A .NET Client for the Android Debug Bridge (ADB)
 - Implemented Services:
     - GetHostVersion
     - GetDevices
+    - TrackDevices
     - Sync
         - Push
         - Pull
