@@ -40,7 +40,17 @@ int hostVersion = await adbClient.GetHostVersion();
 ```csharp
 var adbClient = new AdbServicesClient();
 IList<(string Serial, string State)> devices = await adbClient.GetDevices();
-// ("abcdefghijklmnop", "device")
+```
+
+### Track Devices
+This tracks all device changes until the CancellationToken is cancelled (in this case, for 60 seconds)
+```csharp
+var adbClient = new AdbServicesClient();
+var cts = new CancellationTokenSource(60000);
+await foreach ((string Serial, string State) deviceStateChange in adbClient.TrackDevices(cts.Token))
+{
+    [...]
+}
 ```
 
 ### List root directory
@@ -50,7 +60,6 @@ using(var syncClient = await adbClient.GetSyncClient("abcdefghijklmnop"))
 {
     IList<StatEntry> entries = syncClient.List("/");
 }
-// ("abcdefghijklmnop", "device")
 ```
 
 ### Execute command
