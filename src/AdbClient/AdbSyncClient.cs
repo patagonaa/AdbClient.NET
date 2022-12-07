@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace AdbClient
 {
+    // https://android.googlesource.com/platform/system/adb/+/refs/heads/master/SYNC.TXT
     public class AdbSyncClient : IDisposable
     {
         private readonly TcpClient _tcpClient;

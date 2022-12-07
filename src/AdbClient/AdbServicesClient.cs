@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace AdbClient
 {
+    // https://android.googlesource.com/platform/system/adb/+/refs/heads/master/SERVICES.TXT
     public class AdbServicesClient
     {
         public static readonly Encoding Encoding = Encoding.UTF8;
