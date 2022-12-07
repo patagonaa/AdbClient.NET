@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -42,6 +43,23 @@ namespace AdbClient
             await ExecuteAdbCommand(client, "host:devices");
             var result = await ReadStringResult(client);
             return _deviceRegex.Matches(result).Select(x => (x.Groups["serial"].Value, x.Groups["state"].Value)).ToList();
+        }
+
+        public async IAsyncEnumerable<(string Serial, string State)> TrackDevices([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            using var client = await GetConnectedClient(cancellationToken);
+            await ExecuteAdbCommand(client, "host:track-devices");
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var result = await ReadStringResult(client);
+                if (string.IsNullOrWhiteSpace(result))
+                    continue;
+                var match = _deviceRegex.Match(result);
+                if (!match.Success)
+                    throw new InvalidOperationException($"Invalid response: '{result}'");
+                yield return (match.Groups["serial"].Value, match.Groups["state"].Value);
+            }
         }
 
         public async Task<AdbSyncClient> GetSyncClient(string serial, CancellationToken cancellationToken = default)
