@@ -4,7 +4,7 @@ namespace AdbClient
 {
     [Flags]
     // https://man7.org/linux/man-pages/man7/inode.7.html st_mode
-    public enum UnixFileMode
+    public enum UnixFileMode : uint
     {
         //FileTypeMask = 0xF000,
         Socket = 0xC000,

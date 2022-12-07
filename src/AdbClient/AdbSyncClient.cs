@@ -35,13 +35,13 @@ namespace AdbClient
                     var response = await GetResponse(adbStream, cancellationToken);
                     if (response == "DATA")
                     {
-                        var dataLength = await ReadInt32(adbStream, cancellationToken);
+                        var dataLength = checked((int)await adbStream.ReadUInt32(cancellationToken));
                         await adbStream.ReadExact(buffer[..dataLength], cancellationToken);
                         await outStream.WriteAsync(buffer[..dataLength], cancellationToken);
                     }
                     else if (response == "DONE")
                     {
-                        _ = await ReadInt32(adbStream, cancellationToken);
+                        _ = await adbStream.ReadUInt32(cancellationToken);
                         break;
                     }
                     else
@@ -78,7 +78,7 @@ namespace AdbClient
                 }
                 await SendRequestWithLength(adbStream, "DONE", (int)modifiedDate.ToUnixTimeSeconds(), cancellationToken);
                 await GetResponse(adbStream, cancellationToken);
-                _ = await ReadInt32(adbStream, cancellationToken);
+                _ = await adbStream.ReadUInt32(cancellationToken);
             }
             finally
             {
@@ -145,9 +145,9 @@ namespace AdbClient
 
         private static async Task<StatEntry> ReadStatEntry(Stream stream, Func<Task<string>> getPath, CancellationToken cancellationToken)
         {
-            var fileMode = await ReadInt32(stream, cancellationToken);
-            var fileSize = await ReadInt32(stream, cancellationToken);
-            var fileModifiedTime = await ReadInt32(stream, cancellationToken);
+            var fileMode = await stream.ReadUInt32(cancellationToken);
+            var fileSize = await stream.ReadUInt32(cancellationToken);
+            var fileModifiedTime = await stream.ReadUInt32(cancellationToken);
             var path = await getPath();
             return new StatEntry(path, (UnixFileMode)fileMode, fileSize, DateTime.UnixEpoch.AddSeconds(fileModifiedTime));
         }
@@ -189,21 +189,10 @@ namespace AdbClient
 
         private static async Task<string> ReadString(Stream stream, CancellationToken cancellationToken)
         {
-            var responseLength = await ReadInt32(stream, cancellationToken);
+            var responseLength = await stream.ReadUInt32(cancellationToken);
             var responseBuffer = new byte[responseLength];
             await stream.ReadExact(responseBuffer.AsMemory(), cancellationToken);
             return AdbServicesClient.Encoding.GetString(responseBuffer);
-        }
-
-        private static async Task<int> ReadInt32(Stream stream, CancellationToken cancellationToken = default)
-        {
-            var buffer = new byte[4];
-            await stream.ReadExact(buffer.AsMemory(), cancellationToken);
-            if (!BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(buffer);
-            }
-            return BitConverter.ToInt32(buffer);
         }
 
         public void Dispose()
