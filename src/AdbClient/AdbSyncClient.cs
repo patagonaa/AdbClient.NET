@@ -152,6 +152,43 @@ namespace AdbClient
             return new StatEntry(path, (UnixFileMode)fileMode, fileSize, DateTime.UnixEpoch.AddSeconds(fileModifiedTime));
         }
 
+        public async Task<StatV2Entry> StatV2(string path, bool lstat = true, CancellationToken cancellationToken = default)
+        {
+            var command = lstat ? "LST2" : "STA2";
+            await _semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                var stream = _tcpClient.GetStream();
+                await SendRequestWithPath(stream, command, path, cancellationToken);
+                var response = await GetResponse(stream, cancellationToken);
+                if (response != command)
+                    throw new InvalidOperationException($"Invalid Response Type {response}");
+                return await ReadStatV2Entry(stream, path, cancellationToken);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task<StatV2Entry> ReadStatV2Entry(Stream stream, string path, CancellationToken cancellationToken)
+        {
+            var error = await stream.ReadUInt32(cancellationToken);
+            if (error != 0)
+                throw new AdbException($"Error {error} during stat");
+            await stream.ReadUInt64(cancellationToken); // device ID
+            await stream.ReadUInt64(cancellationToken); // Inode number
+            var mode = await stream.ReadUInt32(cancellationToken);
+            await stream.ReadUInt32(cancellationToken); // Number of hard links
+            var uid = await stream.ReadUInt32(cancellationToken);
+            var gid = await stream.ReadUInt32(cancellationToken);
+            var size = await stream.ReadUInt64(cancellationToken);
+            var atime = await stream.ReadInt64(cancellationToken);
+            var mtime = await stream.ReadInt64(cancellationToken);
+            var ctime = await stream.ReadInt64(cancellationToken);
+            return new StatV2Entry(path, (UnixFileMode)mode, uid, gid, size, DateTime.UnixEpoch.AddSeconds(atime), DateTime.UnixEpoch.AddSeconds(mtime), DateTime.UnixEpoch.AddSeconds(ctime));
+        }
+
         private static async Task SendRequestWithPath(Stream stream, string requestType, string path, CancellationToken cancellationToken)
         {
             int pathLengthBytes = AdbServicesClient.Encoding.GetByteCount(path);

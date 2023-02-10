@@ -25,5 +25,25 @@ namespace AdbClient
             }
             return BitConverter.ToUInt32(buffer);
         }
+        internal static async Task<ulong> ReadUInt64(this Stream stream, CancellationToken cancellationToken)
+        {
+            var buffer = new byte[8];
+            await stream.ReadExact(buffer.AsMemory(), cancellationToken);
+            if (!BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(buffer);
+            }
+            return BitConverter.ToUInt64(buffer);
+        }
+        internal static async Task<long> ReadInt64(this Stream stream, CancellationToken cancellationToken)
+        {
+            var buffer = new byte[8];
+            await stream.ReadExact(buffer.AsMemory(), cancellationToken);
+            if (!BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(buffer);
+            }
+            return BitConverter.ToInt64(buffer);
+        }
     }
 }

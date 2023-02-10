@@ -16,6 +16,7 @@ A .NET Client for the Android Debug Bridge (ADB)
         - Pull
         - List
         - Stat
+        - StatV2
     - Execute
 
 ## Compared to madb / SharpAdbClient
