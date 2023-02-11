@@ -213,9 +213,9 @@ namespace AdbClient
 
         private async Task<StatV2Entry> ReadStatV2Entry(Stream stream, Func<Task<string>> getPath, CancellationToken cancellationToken)
         {
-            var error = await stream.ReadUInt32(cancellationToken);
+            var error = (AdbSyncErrorCode)await stream.ReadUInt32(cancellationToken);
             if (error != 0)
-                throw new AdbException($"Error {error} during stat");
+                throw new AdbSyncException(error);
             await stream.ReadUInt64(cancellationToken); // device ID
             await stream.ReadUInt64(cancellationToken); // Inode number
             var mode = await stream.ReadUInt32(cancellationToken);

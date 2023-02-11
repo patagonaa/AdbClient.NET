@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.1.0
+- feat: throw useful exception when using ListV2/StatV2
+
 ## 3.0.0
 - feat!: replace stat/list with v2 versions (obsolete old versions)
 - fix!: return full path on both stat and list
