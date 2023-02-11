@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AdbClient
 {
-    // https://android.googlesource.com/platform/system/adb/+/refs/heads/master/SYNC.TXT
+    // https://android.googlesource.com/platform/packages/modules/adb/+/refs/heads/master/SYNC.TXT
     public class AdbSyncClient : IDisposable
     {
         private readonly TcpClient _tcpClient;
@@ -86,6 +86,7 @@ namespace AdbClient
             }
         }
 
+        [Obsolete("Use ListV2 instead (if your device supports it)")]
         public async Task<IList<StatEntry>> List(string path, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken);
@@ -124,6 +125,7 @@ namespace AdbClient
             }
         }
 
+        [Obsolete("Use StatV2 instead (if your device supports it)")]
         public async Task<StatEntry> Stat(string path, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken);
@@ -150,6 +152,44 @@ namespace AdbClient
             var fileModifiedTime = await stream.ReadUInt32(cancellationToken);
             var path = await getPath();
             return new StatEntry(path, (UnixFileMode)fileMode, fileSize, DateTime.UnixEpoch.AddSeconds(fileModifiedTime));
+        }
+
+        public async Task<IList<StatV2Entry>> ListV2(string path, CancellationToken cancellationToken = default)
+        {
+            await _semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                var stream = _tcpClient.GetStream();
+                await SendRequestWithPath(stream, "LIS2", path, cancellationToken);
+
+                var toReturn = new List<StatV2Entry>();
+                while (true)
+                {
+                    var response = await GetResponse(stream, cancellationToken);
+                    if (response == "DONE")
+                    {
+                        // ADB sends an entire (empty) stat entry when done, so we have to skip it
+                        var ignoreBuf = new byte[72];
+                        await stream.ReadExact(ignoreBuf, cancellationToken);
+                        break;
+                    }
+                    else if (response == "DNT2")
+                    {
+                        var statEntry = await ReadStatV2Entry(stream, async () => $"{path.TrimEnd('/')}/{await ReadString(stream, cancellationToken)}", cancellationToken);
+                        toReturn.Add(statEntry);
+                    }
+                    else if (response != "STAT")
+                    {
+                        throw new InvalidOperationException($"Invalid Response Type {response}");
+                    }
+                }
+
+                return toReturn;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public async Task<StatV2Entry> StatV2(string path, bool lstat = true, CancellationToken cancellationToken = default)
