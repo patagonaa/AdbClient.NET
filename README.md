@@ -15,6 +15,7 @@ A .NET Client for the Android Debug Bridge (ADB)
         - Push
         - Pull
         - List
+        - ListV2
         - Stat
         - StatV2
     - Execute
@@ -59,7 +60,7 @@ await foreach ((string Serial, string State) deviceStateChange in adbClient.Trac
 var adbClient = new AdbServicesClient();
 using(var syncClient = await adbClient.GetSyncClient("abcdefghijklmnop"))
 {
-    IList<StatEntry> entries = syncClient.List("/");
+    IList<StatV2Entry> entries = syncClient.ListV2("/");
 }
 ```
 
