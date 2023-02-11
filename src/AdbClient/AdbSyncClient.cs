@@ -107,7 +107,7 @@ namespace AdbClient
                     }
                     else if (response == "DENT")
                     {
-                        var statEntry = await ReadStatEntry(stream, async () => await ReadString(stream, cancellationToken), cancellationToken);
+                        var statEntry = await ReadStatEntry(stream, async () => $"{path.TrimEnd('/')}/{await ReadString(stream, cancellationToken)}", cancellationToken);
                         toReturn.Add(statEntry);
                     }
                     else if (response != "STAT")
@@ -163,7 +163,7 @@ namespace AdbClient
                 var response = await GetResponse(stream, cancellationToken);
                 if (response != command)
                     throw new InvalidOperationException($"Invalid Response Type {response}");
-                return await ReadStatV2Entry(stream, path, cancellationToken);
+                return await ReadStatV2Entry(stream, () => Task.FromResult(path), cancellationToken);
             }
             finally
             {
@@ -171,7 +171,7 @@ namespace AdbClient
             }
         }
 
-        private async Task<StatV2Entry> ReadStatV2Entry(Stream stream, string path, CancellationToken cancellationToken)
+        private async Task<StatV2Entry> ReadStatV2Entry(Stream stream, Func<Task<string>> getPath, CancellationToken cancellationToken)
         {
             var error = await stream.ReadUInt32(cancellationToken);
             if (error != 0)
@@ -186,6 +186,7 @@ namespace AdbClient
             var atime = await stream.ReadInt64(cancellationToken);
             var mtime = await stream.ReadInt64(cancellationToken);
             var ctime = await stream.ReadInt64(cancellationToken);
+            var path = await getPath();
             return new StatV2Entry(path, (UnixFileMode)mode, uid, gid, size, DateTime.UnixEpoch.AddSeconds(atime), DateTime.UnixEpoch.AddSeconds(mtime), DateTime.UnixEpoch.AddSeconds(ctime));
         }
 

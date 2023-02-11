@@ -4,7 +4,7 @@ namespace AdbClient
 {
     public class StatEntry
     {
-        public string Path { get; }
+        public string FullPath { get; }
         public UnixFileMode Mode { get; }
         /// <summary>
         /// The size of the file. Be careful with this, sizes larger than 4 GiB just wrap around. Use StatV2 for those instead.
@@ -12,9 +12,9 @@ namespace AdbClient
         public uint Size { get; }
         public DateTime ModifiedTime { get; }
 
-        public StatEntry(string path, UnixFileMode mode, uint size, DateTime modifiedTime)
+        public StatEntry(string fullPath, UnixFileMode mode, uint size, DateTime modifiedTime)
         {
-            Path = path;
+            FullPath = fullPath;
             Mode = mode;
             Size = size;
             ModifiedTime = modifiedTime;
@@ -22,7 +22,7 @@ namespace AdbClient
 
         public override string ToString()
         {
-            return Path;
+            return FullPath;
         }
     }
 }

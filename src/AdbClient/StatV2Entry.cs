@@ -4,7 +4,7 @@ namespace AdbClient
 {
     public class StatV2Entry
     {
-        public string Path { get; }
+        public string FullPath { get; }
         public UnixFileMode Mode { get; }
         public uint UserId { get; }
         public uint GroupId { get; }
@@ -13,9 +13,9 @@ namespace AdbClient
         public DateTime ModifiedTime { get; }
         public DateTime CreatedTime { get; }
 
-        public StatV2Entry(string path, UnixFileMode mode, uint uid, uint gid, ulong size, DateTime accessTime, DateTime modifiedTime, DateTime createdTime)
+        public StatV2Entry(string fullPath, UnixFileMode mode, uint uid, uint gid, ulong size, DateTime accessTime, DateTime modifiedTime, DateTime createdTime)
         {
-            Path = path;
+            FullPath = fullPath;
             Mode = mode;
             UserId = uid;
             GroupId = gid;
@@ -27,7 +27,7 @@ namespace AdbClient
 
         public override string ToString()
         {
-            return Path;
+            return FullPath;
         }
     }
 }
