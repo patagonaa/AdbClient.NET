@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.0
+- feat!: replace stat/list with v2 versions (obsolete old versions)
+- fix!: return full path on both stat and list
+
 ## 2.1.0
 - feat: add StatV2 support (List/Stat size overflows above 4 GiB)
 
