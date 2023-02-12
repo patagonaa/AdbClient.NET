@@ -2,8 +2,8 @@
 {
     public class AdbSyncException : AdbException
     {
-        public AdbSyncException(AdbSyncErrorCode errorCode)
-            : base($"Error code {errorCode}")
+        public AdbSyncException(AdbSyncErrorCode errorCode, string filePath)
+            : base($"{filePath} error {errorCode}")
         {
             ErrorCode = errorCode;
         }

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.1.1
+- fix: don't break connection when sync error occurs
+
 ## 3.1.0
 - feat: throw useful exception when using ListV2/StatV2
 

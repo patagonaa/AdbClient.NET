@@ -9,9 +9,9 @@
       <PackageProjectUrl>https://github.com/patagonaa/AdbClient.NET</PackageProjectUrl>
       <PackageTags>adb;android;android-debug-bridge</PackageTags>
       <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
-      <Version>3.1.0</Version>
+      <Version>3.1.1</Version>
       <PackageReleaseNotes>
-          - feat: throw useful exception when using ListV2/StatV2
+          - fix: don't break connection when sync error occurs
       </PackageReleaseNotes>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
       <PackageReadmeFile>README.md</PackageReadmeFile>

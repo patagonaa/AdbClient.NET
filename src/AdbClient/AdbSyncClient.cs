@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -162,6 +163,7 @@ namespace AdbClient
                 var stream = _tcpClient.GetStream();
                 await SendRequestWithPath(stream, "LIS2", path, cancellationToken);
 
+                var exceptions = new List<AdbSyncException>();
                 var toReturn = new List<StatV2Entry>();
                 while (true)
                 {
@@ -175,14 +177,24 @@ namespace AdbClient
                     }
                     else if (response == "DNT2")
                     {
-                        var statEntry = await ReadStatV2Entry(stream, async () => $"{path.TrimEnd('/')}/{await ReadString(stream, cancellationToken)}", cancellationToken);
-                        toReturn.Add(statEntry);
+                        try
+                        {
+                            var statEntry = await ReadStatV2Entry(stream, async () => $"{path.TrimEnd('/')}/{await ReadString(stream, cancellationToken)}", cancellationToken);
+                            toReturn.Add(statEntry);
+                        }
+                        catch (AdbSyncException ex)
+                        {
+                            exceptions.Add(ex);
+                        }
                     }
                     else if (response != "STAT")
                     {
                         throw new InvalidOperationException($"Invalid Response Type {response}");
                     }
                 }
+
+                if (exceptions.Count > 0)
+                    throw new AggregateException(exceptions);
 
                 return toReturn;
             }
@@ -214,8 +226,6 @@ namespace AdbClient
         private async Task<StatV2Entry> ReadStatV2Entry(Stream stream, Func<Task<string>> getPath, CancellationToken cancellationToken)
         {
             var error = (AdbSyncErrorCode)await stream.ReadUInt32(cancellationToken);
-            if (error != 0)
-                throw new AdbSyncException(error);
             await stream.ReadUInt64(cancellationToken); // device ID
             await stream.ReadUInt64(cancellationToken); // Inode number
             var mode = await stream.ReadUInt32(cancellationToken);
@@ -227,6 +237,8 @@ namespace AdbClient
             var mtime = await stream.ReadInt64(cancellationToken);
             var ctime = await stream.ReadInt64(cancellationToken);
             var path = await getPath();
+            if (error != 0)
+                throw new AdbSyncException(error, path);
             return new StatV2Entry(path, (UnixFileMode)mode, uid, gid, size, DateTime.UnixEpoch.AddSeconds(atime), DateTime.UnixEpoch.AddSeconds(mtime), DateTime.UnixEpoch.AddSeconds(ctime));
         }
 
