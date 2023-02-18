@@ -9,9 +9,9 @@
       <PackageProjectUrl>https://github.com/patagonaa/AdbClient.NET</PackageProjectUrl>
       <PackageTags>adb;android;android-debug-bridge</PackageTags>
       <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
-      <Version>3.1.1</Version>
+      <Version>3.2.0</Version>
       <PackageReleaseNotes>
-          - fix: don't break connection when sync error occurs
+          - feat: add ScreenCapture support
       </PackageReleaseNotes>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
       <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -19,6 +19,10 @@
 
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
     </ItemGroup>
 
 </Project>

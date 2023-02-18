@@ -1,4 +1,7 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -68,6 +71,62 @@ namespace AdbClient
             await ExecuteAdbCommand(client, $"host:transport:{serial}", cancellationToken);
             await ExecuteAdbCommand(client, $"sync:", cancellationToken);
             return new AdbSyncClient(client);
+        }
+
+        public async Task<Image> ScreenCapture(string serial, CancellationToken cancellationToken = default)
+        {
+            using var client = await GetConnectedClient(cancellationToken);
+            await ExecuteAdbCommand(client, $"host:transport:{serial}", cancellationToken);
+            await ExecuteAdbCommand(client, $"framebuffer:", cancellationToken);
+            var stream = client.GetStream();
+
+            var version = await stream.ReadUInt32(cancellationToken);
+            if (version != 2)
+            {
+                throw new InvalidOperationException($"Invalid version {version}");
+            }
+            var bpp = await stream.ReadUInt32(cancellationToken);
+            var colorSpace = await stream.ReadUInt32(cancellationToken);
+            var size = await stream.ReadUInt32(cancellationToken);
+            var width = Convert.ToInt32(await stream.ReadUInt32(cancellationToken));
+            var height = Convert.ToInt32(await stream.ReadUInt32(cancellationToken));
+            var rOff = await stream.ReadUInt32(cancellationToken);
+            var rLen = await stream.ReadUInt32(cancellationToken);
+            var bOff = await stream.ReadUInt32(cancellationToken);
+            var bLen = await stream.ReadUInt32(cancellationToken);
+            var gOff = await stream.ReadUInt32(cancellationToken);
+            var gLen = await stream.ReadUInt32(cancellationToken);
+            var aOff = await stream.ReadUInt32(cancellationToken);
+            var aLen = await stream.ReadUInt32(cancellationToken);
+
+            var buffer = new byte[size];
+            await stream.ReadExact(buffer.AsMemory(), cancellationToken);
+
+            var pixfmt = (bpp, (rOff, rLen), (gOff, gLen), (bOff, bLen), (aOff, aLen));
+            Image img = pixfmt switch
+            {
+                (32, (0, 8), (8, 8), (16, 8), (24, 8)) => Image.LoadPixelData<Rgba32>(buffer, width, height),
+                (32, (0, 8), (8, 8), (16, 8), (_, 0)) => GetRgbx32(width, height, buffer),
+                (24, (0, 8), (8, 8), (16, 8), (_, 0)) => Image.LoadPixelData<Rgb24>(buffer, width, height),
+                (16, (11, 5), (5, 6), (0, 5), (_, 0)) => Image.LoadPixelData<Bgr565>(buffer, width, height),
+                (32, (16, 8), (8, 8), (0, 8), (24, 8)) => Image.LoadPixelData<Bgra32>(buffer, width, height),
+                _ => throw new InvalidOperationException($"Invalid Pixel format {pixfmt}"),
+            };
+
+            return img;
+
+            static Image<Rgba32> GetRgbx32(int width, int height, byte[] buffer)
+            {
+                Image<Rgba32> image = Image.LoadPixelData<Rgba32>(buffer, width, height);
+                image.Mutate(x => x.ProcessPixelRowsAsVector4(rows =>
+                {
+                    for (int i = 0; i < rows.Length; i++)
+                    {
+                        rows[i].W = 1;
+                    }
+                }));
+                return image;
+            }
         }
 
         public async Task<int> Execute(string serial, string command, IEnumerable<string> parms, Stream? stdin, Stream? stdout, Stream? stderr, CancellationToken cancellationToken = default)

@@ -8,17 +8,18 @@ A .NET Client for the Android Debug Bridge (ADB)
 - Simple
 - Thread-Safe
 - Implemented Services:
-    - GetHostVersion
-    - GetDevices
-    - TrackDevices
-    - Sync
-        - Push
-        - Pull
-        - List
-        - ListV2
-        - Stat
-        - StatV2
-    - Execute
+    - GetHostVersion (`host:version`)
+    - GetDevices (`host:devices`)
+    - TrackDevices (`host:track-devices`)
+    - Sync (`sync:`)
+        - Push (`SEND`)
+        - Pull (`RECV`)
+        - List (`LIST`)
+        - ListV2 (`LIS2`)
+        - Stat (`STAT`)
+        - StatV2 (`LST2`/`STA2`)
+    - Execute (`shell,v2:`)
+    - ScreenCapture (`framebuffer:`)
 
 ## Compared to madb / SharpAdbClient
 
@@ -92,4 +93,12 @@ int exitCode = await adbClient.Execute("abcdefghijklmnop", "cat", new string[] {
 if (exitCode != 0)
     throw new Exception(Encoding.UTF8.GetString(stderr.ToArray()));
 Console.WriteLine(Encoding.UTF8.GetString(stdout.ToArray())); // prints "Hello World"
+```
+
+### Capture screen
+#### Capture and save as png
+```csharp
+var adbClient = new AdbServicesClient();
+Image img = await adbClient.ScreenCapture("abcdefghijklmnop");
+img.SaveAsPng("image.png");
 ```

@@ -11,7 +11,7 @@ namespace AdbClient
         {
             for (int i = 0; i < memory.Length;)
             {
-                i += await stream.ReadAsync(memory.Slice(i), cancellationToken);
+                i += await stream.ReadAsync(memory[i..], cancellationToken);
             }
         }
 
@@ -25,6 +25,7 @@ namespace AdbClient
             }
             return BitConverter.ToUInt32(buffer);
         }
+
         internal static async Task<ulong> ReadUInt64(this Stream stream, CancellationToken cancellationToken)
         {
             var buffer = new byte[8];
@@ -35,6 +36,7 @@ namespace AdbClient
             }
             return BitConverter.ToUInt64(buffer);
         }
+
         internal static async Task<long> ReadInt64(this Stream stream, CancellationToken cancellationToken)
         {
             var buffer = new byte[8];

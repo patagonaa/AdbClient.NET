@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.2.0
+- feat: add ScreenCapture support
+
 ## 3.1.1
 - fix: don't break connection when sync error occurs
 
