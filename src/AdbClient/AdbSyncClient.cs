@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,7 +56,12 @@ namespace AdbClient
             }
         }
 
-        public async Task Push(string path, UnixFileMode permissions, DateTimeOffset modifiedDate, Stream inStream, CancellationToken cancellationToken = default)
+        public async Task Push(
+            string path,
+            Stream inStream,
+            DateTimeOffset? modifiedDate = null,
+            UnixFileMode permissions = UnixFileMode.OwnerRead | UnixFileMode.OwnerWrite | UnixFileMode.GroupRead | UnixFileMode.GroupWrite,
+            CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken);
             try
@@ -77,7 +81,7 @@ namespace AdbClient
                     await SendRequestWithLength(adbStream, "DATA", readBytes, cancellationToken);
                     await adbStream.WriteAsync(buffer[..readBytes], cancellationToken);
                 }
-                await SendRequestWithLength(adbStream, "DONE", (int)modifiedDate.ToUnixTimeSeconds(), cancellationToken);
+                await SendRequestWithLength(adbStream, "DONE", (int)(modifiedDate ?? DateTimeOffset.UtcNow).ToUnixTimeSeconds(), cancellationToken);
                 await GetResponse(adbStream, cancellationToken);
                 _ = await adbStream.ReadUInt32(cancellationToken);
             }
