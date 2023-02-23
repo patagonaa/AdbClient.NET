@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 4.0.0
+- feat!: change `Push` method signature to match `Pull`
+
 ## 3.2.0
 - feat: add ScreenCapture support
 
