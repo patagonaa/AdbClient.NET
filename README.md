@@ -46,7 +46,7 @@ IList<(string Serial, string State)> devices = await adbClient.GetDevices();
 ```
 
 ### Track Devices
-This tracks all device changes until the CancellationToken is cancelled (in this case, for 60 seconds)
+This tracks all device changes (connect, disconnect, etc.) until the CancellationToken is cancelled (in this case, for 60 seconds)
 ```csharp
 var adbClient = new AdbServicesClient();
 var cts = new CancellationTokenSource(60000);
@@ -59,9 +59,27 @@ await foreach ((string Serial, string State) deviceStateChange in adbClient.Trac
 ### List root directory
 ```csharp
 var adbClient = new AdbServicesClient();
-using(var syncClient = await adbClient.GetSyncClient("abcdefghijklmnop"))
+using (var syncClient = await adbClient.GetSyncClient("abcdefghijklmnop"))
 {
     IList<StatV2Entry> entries = syncClient.ListV2("/");
+}
+```
+
+### Upload file to device
+```csharp
+using (var fs = File.OpenRead("test.mp3"))
+using (var syncClient = await client.GetSyncClient("abcdefghijklmnop"))
+{
+    await syncClient.Push("/storage/emulated/0/Music/test.mp3", fs);
+}
+```
+
+### Download file from device
+```csharp
+using (var fs = File.OpenWrite("test.mp3"))
+using (var syncClient = await client.GetSyncClient("abcdefghijklmnop"))
+{
+    await syncClient.Pull("/storage/emulated/0/Music/test.mp3", fs);
 }
 ```
 
