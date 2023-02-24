@@ -117,6 +117,6 @@ Console.WriteLine(Encoding.UTF8.GetString(stdout.ToArray())); // prints "Hello W
 #### Capture and save as png
 ```csharp
 var adbClient = new AdbServicesClient();
-Image img = await adbClient.ScreenCapture("abcdefghijklmnop");
+using Image img = await adbClient.ScreenCapture("abcdefghijklmnop");
 img.SaveAsPng("image.png");
 ```
