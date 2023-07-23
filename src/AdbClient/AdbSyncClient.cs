@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace AdbClient
 {
-    // https://android.googlesource.com/platform/packages/modules/adb/+/refs/heads/master/SYNC.TXT
+    /// <summary>
+    /// A client to communicate to an Android device via the "adb sync" protocol
+    /// </summary>
+    /// <seealso href="https://android.googlesource.com/platform/packages/modules/adb/+/refs/heads/master/SYNC.TXT"/>
     public class AdbSyncClient : IDisposable
     {
         private readonly TcpClient _tcpClient;
@@ -18,6 +21,13 @@ namespace AdbClient
             _tcpClient = tcpClient;
         }
 
+        /// <summary>
+        /// Pull a file from the device
+        /// </summary>
+        /// <param name="path">The file on the device to read from</param>
+        /// <param name="outStream">The stream the file contents are written to</param>
+        /// <exception cref="AdbException"></exception>
+        /// <exception cref="OperationCanceledException"></exception>
         public async Task Pull(string path, Stream outStream, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken);
@@ -56,6 +66,15 @@ namespace AdbClient
             }
         }
 
+        /// <summary>
+        /// Push a file to the device
+        /// </summary>
+        /// <param name="path">The file on the device to write to</param>
+        /// <param name="inStream">The stream the file contents are read from</param>
+        /// <param name="modifiedDate">The file modified time to set (or <see langword="null"/> to set to current time)</param>
+        /// <param name="permissions">The file permissions to set</param>
+        /// <exception cref="AdbException"></exception>
+        /// <exception cref="OperationCanceledException"></exception>
         public async Task Push(
             string path,
             Stream inStream,
@@ -159,6 +178,14 @@ namespace AdbClient
             return new StatEntry(path, (UnixFileMode)fileMode, fileSize, DateTime.UnixEpoch.AddSeconds(fileModifiedTime));
         }
 
+        /// <summary>
+        /// Get information about each file in a directory.
+        /// This uses lstat internally, so symlink info is returned rather than the info about the file it is pointing to.
+        /// </summary>
+        /// <param name="path">The path on the device to list</param>
+        /// <returns>A list of directory entries</returns>
+        /// <exception cref="AdbException"></exception>
+        /// <exception cref="OperationCanceledException"></exception>
         public async Task<IList<StatV2Entry>> ListV2(string path, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken);
@@ -197,6 +224,14 @@ namespace AdbClient
             }
         }
 
+        /// <summary>
+        /// Get information about a single file
+        /// </summary>
+        /// <param name="path">The path on the device</param>
+        /// <param name="lstat">Use <c>lstat()</c> instead of <c>stat()</c> (return symlink info rather than the info about the file it is pointing to)</param>
+        /// <returns>Information about the file</returns>
+        /// <exception cref="AdbException"></exception>
+        /// <exception cref="OperationCanceledException"></exception>
         public async Task<StatV2Entry> StatV2(string path, bool lstat = true, CancellationToken cancellationToken = default)
         {
             var command = lstat ? "LST2" : "STA2";
@@ -276,6 +311,7 @@ namespace AdbClient
             return AdbServicesClient.Encoding.GetString(responseBuffer);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _tcpClient.Dispose();

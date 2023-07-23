@@ -1,28 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-      <PackageId>patagona.$(AssemblyName)</PackageId>
-      <Authors>patagona</Authors>
-      <Description>A .NET Client for the Android Debug Bridge (ADB)</Description>
-      <PackageProjectUrl>https://github.com/patagonaa/AdbClient.NET</PackageProjectUrl>
-      <PackageTags>adb;android;android-debug-bridge</PackageTags>
-      <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
-      <Version>4.0.0</Version>
-      <PackageReleaseNotes>
-          - feat!: change `Push` method signature to match `Pull`
-      </PackageReleaseNotes>
-      <PackageLicenseExpression>MIT</PackageLicenseExpression>
-      <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
+        <PackageId>patagona.$(AssemblyName)</PackageId>
+        <Authors>patagona</Authors>
+        <Description>A .NET Client for the Android Debug Bridge (ADB)</Description>
+        <PackageProjectUrl>https://github.com/patagonaa/AdbClient.NET</PackageProjectUrl>
+        <PackageTags>adb;android;android-debug-bridge</PackageTags>
+        <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
+        <Version>4.0.0</Version>
+        <PackageReleaseNotes>
+            - feat!: change `Push` method signature to match `Pull`
+        </PackageReleaseNotes>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1573;1591</NoWarn>
+    </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
     </ItemGroup>
 
 </Project>

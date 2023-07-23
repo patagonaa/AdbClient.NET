@@ -16,10 +16,13 @@ using System.Threading.Tasks;
 
 namespace AdbClient
 {
-    // https://android.googlesource.com/platform/system/adb/+/refs/heads/master/SERVICES.TXT
+    /// <summary>
+    /// Client that uses an ADB server to communicate with attached Android devices
+    /// </summary>
+    /// <seealso href="https://android.googlesource.com/platform/packages/modules/adb/+/c36807b1a84e6ee64e3f2380bbcbbead6d9ae7e4/SERVICES.TXT"/>
     public class AdbServicesClient
     {
-        public static readonly Encoding Encoding = Encoding.UTF8;
+        internal static readonly Encoding Encoding = Encoding.UTF8;
         private static readonly Regex _deviceRegex = new Regex(@"^(?<serial>[\S ]+?)\t(?<state>[\S ]+)$", RegexOptions.Multiline);
         private readonly IPEndPoint _endPoint;
 
@@ -33,6 +36,10 @@ namespace AdbClient
             _endPoint = endPoint;
         }
 
+        /// <summary>
+        /// Ask the ADB server for its internal version number.
+        /// </summary>
+        /// <exception cref="AdbException"></exception>
         public async Task<int> GetHostVersion(CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
@@ -40,6 +47,10 @@ namespace AdbClient
             return int.Parse(await ReadStringResult(client, cancellationToken), NumberStyles.HexNumber);
         }
 
+        /// <summary>
+        /// Ask to return the list of available Android devices and their state.
+        /// </summary>
+        /// <exception cref="AdbException"></exception>
         public async Task<IList<(string Serial, AdbConnectionState State)>> GetDevices(CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
@@ -48,6 +59,12 @@ namespace AdbClient
             return _deviceRegex.Matches(result).Select(x => (x.Groups["serial"].Value, GetConnectionStateFromString(x.Groups["state"].Value))).ToList();
         }
 
+        /// <summary>
+        /// This is a variant of <see cref="GetDevices(CancellationToken)"/> which doesn't close the connection.
+        /// Instead, a new device list description is sent each time a device is added/removed
+        /// or the state of a given device changes.
+        /// </summary>
+        /// <exception cref="AdbException"></exception>
         public async IAsyncEnumerable<(string Serial, AdbConnectionState State)> TrackDevices([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
@@ -65,6 +82,11 @@ namespace AdbClient
             }
         }
 
+        /// <summary>
+        /// Get a sync client to do file operations on the target device via the "adb sync" protocol
+        /// </summary>
+        /// <param name="serial">The serial number of the target device</param>
+        /// <exception cref="AdbException"></exception>
         public async Task<AdbSyncClient> GetSyncClient(string serial, CancellationToken cancellationToken = default)
         {
             var client = await GetConnectedClient(cancellationToken);
@@ -73,6 +95,11 @@ namespace AdbClient
             return new AdbSyncClient(client);
         }
 
+        /// <summary>
+        /// Get a screenshot from the target device
+        /// </summary>
+        /// <param name="serial">The serial number of the target device</param>
+        /// <exception cref="AdbException"></exception>
         public async Task<Image> ScreenCapture(string serial, CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
@@ -129,11 +156,22 @@ namespace AdbClient
             }
         }
 
-        public async Task<int> Execute(string serial, string command, IEnumerable<string> parms, Stream? stdin, Stream? stdout, Stream? stderr, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Execute a shell command on the target device.
+        /// </summary>
+        /// <param name="serial">The serial number of the target device</param>
+        /// <param name="command">The command to execute</param>
+        /// <param name="args">The parameters to pass to the command</param>
+        /// <param name="stdin">A stream to copy to the command's <c>stdin</c> or <see langword="null"/> to ignore</param>
+        /// <param name="stdout">A stream the command's <c>stdout</c> is written to or <see langword="null"/> to ignore</param>
+        /// <param name="stderr">A stream the command's <c>stderr</c> is written to or <see langword="null"/> to ignore</param>
+        /// <returns>The command's exit code</returns>
+        /// <exception cref="AdbException"></exception>
+        public async Task<int> Execute(string serial, string command, IEnumerable<string> args, Stream? stdin, Stream? stdout, Stream? stderr, CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
             await ExecuteAdbCommand(client, $"host:transport:{serial}", cancellationToken);
-            await ExecuteAdbCommand(client, $"shell,v2,raw:{GetShellCommand(command, parms)}", cancellationToken);
+            await ExecuteAdbCommand(client, $"shell,v2,raw:{GetShellCommand(command, args)}", cancellationToken);
 
             var stream = client.GetStream();
 
@@ -164,7 +202,7 @@ namespace AdbClient
                             returnCode = message[0];
                             break;
                         default:
-                            throw new Exception($"Invalid Shell Command {type}");
+                            throw new InvalidOperationException($"Invalid Shell Command {type}");
                     }
                 }
             }
@@ -192,7 +230,6 @@ namespace AdbClient
                         var lengthBytes = BitConverter.GetBytes(readLen);
                         if (!BitConverter.IsLittleEndian)
                         {
-
                             Array.Reverse(lengthBytes);
                         }
                         lengthBytes.CopyTo(buffer[1..]);

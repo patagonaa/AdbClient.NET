@@ -2,8 +2,10 @@
 
 namespace AdbClient
 {
+    /// <summary>
+    /// Unix st_mode as defined in <see href="https://man7.org/linux/man-pages/man7/inode.7.html"/>
+    /// </summary>
     [Flags]
-    // https://man7.org/linux/man-pages/man7/inode.7.html st_mode
     public enum UnixFileMode : uint
     {
         //FileTypeMask = 0xF000,
