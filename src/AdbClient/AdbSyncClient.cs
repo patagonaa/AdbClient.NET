@@ -241,9 +241,7 @@ namespace AdbClient
             var mtime = await stream.ReadInt64(cancellationToken);
             var ctime = await stream.ReadInt64(cancellationToken);
             var path = await getPath();
-            if (error != 0)
-                throw new AdbSyncException(error, path);
-            return new StatV2Entry(path, (UnixFileMode)mode, uid, gid, size, DateTime.UnixEpoch.AddSeconds(atime), DateTime.UnixEpoch.AddSeconds(mtime), DateTime.UnixEpoch.AddSeconds(ctime));
+            return new StatV2Entry(path, (UnixFileMode)mode, uid, gid, size, DateTime.UnixEpoch.AddSeconds(atime), DateTime.UnixEpoch.AddSeconds(mtime), DateTime.UnixEpoch.AddSeconds(ctime), error);
         }
 
         private static async Task SendRequestWithPath(Stream stream, string requestType, string path, CancellationToken cancellationToken)

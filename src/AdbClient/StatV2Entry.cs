@@ -12,8 +12,9 @@ namespace AdbClient
         public DateTime AccessTime { get; }
         public DateTime ModifiedTime { get; }
         public DateTime CreatedTime { get; }
+        public AdbSyncErrorCode Error { get; }
 
-        public StatV2Entry(string fullPath, UnixFileMode mode, uint uid, uint gid, ulong size, DateTime accessTime, DateTime modifiedTime, DateTime createdTime)
+        public StatV2Entry(string fullPath, UnixFileMode mode, uint uid, uint gid, ulong size, DateTime accessTime, DateTime modifiedTime, DateTime createdTime, AdbSyncErrorCode error)
         {
             FullPath = fullPath;
             Mode = mode;
@@ -23,6 +24,7 @@ namespace AdbClient
             AccessTime = accessTime;
             ModifiedTime = modifiedTime;
             CreatedTime = createdTime;
+            Error = error;
         }
 
         public override string ToString()
