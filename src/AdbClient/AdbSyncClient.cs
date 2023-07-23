@@ -167,7 +167,6 @@ namespace AdbClient
                 var stream = _tcpClient.GetStream();
                 await SendRequestWithPath(stream, "LIS2", path, cancellationToken);
 
-                var exceptions = new List<AdbSyncException>();
                 var toReturn = new List<StatV2Entry>();
                 while (true)
                 {
@@ -181,24 +180,14 @@ namespace AdbClient
                     }
                     else if (response == "DNT2")
                     {
-                        try
-                        {
-                            var statEntry = await ReadStatV2Entry(stream, async () => $"{path.TrimEnd('/')}/{await ReadString(stream, cancellationToken)}", cancellationToken);
-                            toReturn.Add(statEntry);
-                        }
-                        catch (AdbSyncException ex)
-                        {
-                            exceptions.Add(ex);
-                        }
+                        var statEntry = await ReadStatV2Entry(stream, async () => $"{path.TrimEnd('/')}/{await ReadString(stream, cancellationToken)}", cancellationToken);
+                        toReturn.Add(statEntry);
                     }
                     else if (response != "STAT")
                     {
                         throw new InvalidOperationException($"Invalid Response Type {response}");
                     }
                 }
-
-                if (exceptions.Count > 0)
-                    throw new AggregateException(exceptions);
 
                 return toReturn;
             }

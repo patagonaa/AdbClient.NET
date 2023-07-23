@@ -2,7 +2,7 @@
 {
     public enum AdbSyncErrorCode
     {
-        NoError,
+        None = 0,
         EACCES = 13,
         EEXIST = 17,
         EFAULT = 14,
