@@ -40,15 +40,15 @@ namespace AdbClient
             return int.Parse(await ReadStringResult(client, cancellationToken), NumberStyles.HexNumber);
         }
 
-        public async Task<IList<(string Serial, string State)>> GetDevices(CancellationToken cancellationToken = default)
+        public async Task<IList<(string Serial, AdbConnectionState State)>> GetDevices(CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
             await ExecuteAdbCommand(client, "host:devices", cancellationToken);
             var result = await ReadStringResult(client, cancellationToken);
-            return _deviceRegex.Matches(result).Select(x => (x.Groups["serial"].Value, x.Groups["state"].Value)).ToList();
+            return _deviceRegex.Matches(result).Select(x => (x.Groups["serial"].Value, GetConnectionStateFromString(x.Groups["state"].Value))).ToList();
         }
 
-        public async IAsyncEnumerable<(string Serial, string State)> TrackDevices([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<(string Serial, AdbConnectionState State)> TrackDevices([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             using var client = await GetConnectedClient(cancellationToken);
             await ExecuteAdbCommand(client, "host:track-devices", cancellationToken);
@@ -61,7 +61,7 @@ namespace AdbClient
                 var match = _deviceRegex.Match(result);
                 if (!match.Success)
                     throw new InvalidOperationException($"Invalid response: '{result}'");
-                yield return (match.Groups["serial"].Value, match.Groups["state"].Value);
+                yield return (match.Groups["serial"].Value, GetConnectionStateFromString(match.Groups["state"].Value));
             }
         }
 
@@ -242,6 +242,27 @@ namespace AdbClient
                 sb.Append("'");
             }
             return sb.ToString();
+        }
+
+        // https://android.googlesource.com/platform/packages/modules/adb/+/c36807b1a84e6ee64e3f2380bbcbbead6d9ae7e4/adb.cpp#117
+        // https://android.googlesource.com/platform/system/core/+/9f0e6493e5e75c65cff1d456d11243b1114ce57a/diagnose_usb/diagnose_usb.cpp#83
+        private AdbConnectionState GetConnectionStateFromString(string state)
+        {
+            return state switch
+            {
+                "offline" => AdbConnectionState.Offline,
+                "bootloader" => AdbConnectionState.Bootloader,
+                "device" => AdbConnectionState.Device,
+                "host" => AdbConnectionState.Host,
+                "recovery" => AdbConnectionState.Recovery,
+                "rescue" => AdbConnectionState.Rescue,
+                "sideload" => AdbConnectionState.Sideload,
+                "unauthorized" => AdbConnectionState.Unauthorized,
+                "authorizing" => AdbConnectionState.Authorizing,
+                "connecting" => AdbConnectionState.Connecting,
+                _ when state.StartsWith("no permissions") => AdbConnectionState.NoPerm, // "no permissions (reason); see <URL>"
+                _ => AdbConnectionState.Unknown
+            };
         }
 
         private async Task ExecuteAdbCommand(TcpClient tcpClient, string command, CancellationToken cancellationToken)

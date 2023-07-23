@@ -42,7 +42,7 @@ int hostVersion = await adbClient.GetHostVersion();
 ### Get Devices
 ```csharp
 var adbClient = new AdbServicesClient();
-IList<(string Serial, string State)> devices = await adbClient.GetDevices();
+IList<(string Serial, AdbConnectionState State)> devices = await adbClient.GetDevices();
 ```
 
 ### Track Devices
@@ -50,7 +50,7 @@ This tracks all device changes (connect, disconnect, etc.) until the Cancellatio
 ```csharp
 var adbClient = new AdbServicesClient();
 var cts = new CancellationTokenSource(60000);
-await foreach ((string Serial, string State) deviceStateChange in adbClient.TrackDevices(cts.Token))
+await foreach ((string Serial, AdbConnectionState State) deviceStateChange in adbClient.TrackDevices(cts.Token))
 {
     [...]
 }
