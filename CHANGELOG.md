@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 5.0.0
+- feat!: make `ListV2` and `StatV2` return an error code for each entry instead of throwing exceptions.
+    - callers of these methods must now check the new property `Error` on each stat entry
+- feat!: use enum for device connection state instead of string
+- feat: add documentation
+
 ## 4.0.0
 - feat!: change `Push` method signature to match `Pull`
 

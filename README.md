@@ -29,7 +29,7 @@ A .NET Client for the Android Debug Bridge (ADB)
     - Async
     - CancellationToken support
 - Cons:
-    - Lots of services not (yet) implemented (pull requests are welcome)
+    - Some services not (yet) implemented (pull requests are welcome)
 
 ## Examples
 
