@@ -13,11 +13,14 @@
         <Version>5.0.1</Version>
         <PackageReleaseNotes>
             - fix: upgrade SixLabors.ImageSharp to non-vulnerable version
+            - feat: include NuGet symbol package
         </PackageReleaseNotes>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1573;1591</NoWarn>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>

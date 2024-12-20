@@ -2,6 +2,7 @@
 
 ## 5.0.1
 - fix: upgrade SixLabors.ImageSharp to non-vulnerable version
+- feat: include NuGet symbol package
 
 ## 5.0.0
 - feat!: make `ListV2` and `StatV2` return an error code for each entry instead of throwing exceptions.
