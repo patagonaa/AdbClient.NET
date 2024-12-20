@@ -10,11 +10,9 @@
         <PackageTags>adb;android;android-debug-bridge</PackageTags>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
-        <Version>5.0.0</Version>
+        <Version>5.0.1</Version>
         <PackageReleaseNotes>
-            - feat!: make `ListV2` and `StatV2` return an error code for each entry instead of throwing exceptions. Callers of these methods must now check the new property `Error` on each stat entry
-            - feat!: use enum for device connection state instead of string
-            - feat: add documentation
+            - fix: upgrade SixLabors.ImageSharp to non-vulnerable version
         </PackageReleaseNotes>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -28,7 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.8" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.9" />
     </ItemGroup>
 
 </Project>

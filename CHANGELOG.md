@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 5.0.1
+- fix: upgrade SixLabors.ImageSharp to non-vulnerable version
+
 ## 5.0.0
 - feat!: make `ListV2` and `StatV2` return an error code for each entry instead of throwing exceptions.
     - callers of these methods must now check the new property `Error` on each stat entry
