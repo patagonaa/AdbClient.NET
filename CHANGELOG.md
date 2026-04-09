@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 6.0.0
+- fix: upgrade SixLabors.ImageSharp to non-vulnerable version
+- fix: target .NET 8.0 as .NET Standard is no longer required and .NET 6.0 is out of support
+
 ## 5.0.1
 - fix: upgrade SixLabors.ImageSharp to non-vulnerable version
 - feat: include NuGet symbol package

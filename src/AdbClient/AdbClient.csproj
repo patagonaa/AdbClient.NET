@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <PackageId>patagona.$(AssemblyName)</PackageId>
         <Authors>patagona</Authors>
@@ -10,10 +10,10 @@
         <PackageTags>adb;android;android-debug-bridge</PackageTags>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/patagonaa/AdbClient.NET.git</RepositoryUrl>
-        <Version>5.0.1</Version>
+        <Version>6.0.0</Version>
         <PackageReleaseNotes>
             - fix: upgrade SixLabors.ImageSharp to non-vulnerable version
-            - feat: include NuGet symbol package
+            - fix: target .NET 8.0 as .NET Standard is no longer required and .NET 6.0 is out of support
         </PackageReleaseNotes>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -29,7 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.9" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     </ItemGroup>
 
 </Project>
