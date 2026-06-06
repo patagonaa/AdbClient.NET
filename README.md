@@ -120,3 +120,15 @@ var adbClient = new AdbServicesClient();
 using Image img = await adbClient.ScreenCapture("abcdefghijklmnop");
 img.SaveAsPng("image.png");
 ```
+
+## Support
+
+Please consider donating (via GitHub Sponsors) if this project is useful to you.
+
+You can also support this project in other ways:
+
+- by reporting bugs (via issues)
+- by requesting features (via issues/discussions)
+- by contributing code directly (via pull requests)
+
+AI-generated contributions (code or issues) are not welcome and will not be considered.
