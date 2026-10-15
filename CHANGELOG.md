@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 7.0.0
+- fix!: remove ImageSharp as I don't want to jump through hoops to get a license and it keeps having vulnerabilities
+
 ## 6.0.0
 - fix: upgrade SixLabors.ImageSharp to non-vulnerable version
 - fix: target .NET 8.0 as .NET Standard is no longer required and .NET 6.0 is out of support
