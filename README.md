@@ -113,14 +113,6 @@ if (exitCode != 0)
 Console.WriteLine(Encoding.UTF8.GetString(stdout.ToArray())); // prints "Hello World"
 ```
 
-### Capture screen
-#### Capture and save as png
-```csharp
-var adbClient = new AdbServicesClient();
-using Image img = await adbClient.ScreenCapture("abcdefghijklmnop");
-img.SaveAsPng("image.png");
-```
-
 ## Support
 
 Please consider donating (via GitHub Sponsors) if this project is useful to you.
